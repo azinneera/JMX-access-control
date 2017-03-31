@@ -36,7 +36,7 @@ This code is based on the Oracle documentation on [Java SE Monitoring and Manage
         -J-Djavax.net.ssl.trustStorePassword=admin123
 6. In jConsole, select romote process options and type in `localhost:3000` using provided credentials:
 username: `monitorRole` and password: `QED` or username: `controlRole` and password: `R&D`
-7. On the MBeans tab under `com.example > hello`, try out changing the value of `CacheSize` attribute and invoke the `add` and `sayHello` operations
+7. On the MBeans tab under `com.example > hello`, try out changing the value of `CacheSize` attribute and invoke the `add()` and `sayHello()` operations
  * *Login with monitorRole will not allow changing the cacheSize or to invoke the operations since it was given the readOnly privilege*
  * *controlRole allows changing the attribute values and to invoke operations successfully since it has the readWrite privilege*
 
