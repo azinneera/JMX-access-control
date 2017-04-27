@@ -1,0 +1,74 @@
+grant {
+    permission java.util.PropertyPermission "*", "read,write";
+    permission java.net.SocketPermission "*","connect,listen,resolve,accept";
+
+    permission javax.management.remote.SubjectDelegationPermission "javax.management.remote.JMXPrincipal.monitorRole";
+    permission javax.management.remote.SubjectDelegationPermission "javax.management.remote.JMXPrincipal.controlRole";
+
+    permission java.security.SecurityPermission "createAccessControlContext";
+    permission java.security.SecurityPermission "getDomainCombiner";
+    permission java.security.SecurityPermission "getPolicy";
+    permission java.security.SecurityPermission "getProperty.*";
+    permission java.security.SecurityPermission "insertProvider.SUN";
+    permission java.security.SecurityPermission "putProviderProperty.SUN";
+    permission java.security.SecurityPermission "setPolicy";
+    permission java.security.SecurityPermission "setProperty.package.access";
+    permission java.security.SecurityPermission "setProperty.package.definition";
+    permission javax.security.auth.AuthPermission "doAsPrivileged";
+    permission javax.security.auth.AuthPermission "createLoginContext.HsqlDbRealm";
+    permission javax.security.auth.AuthPermission "getLoginConfiguration";
+    permission javax.security.auth.AuthPermission "*";
+
+
+    permission javax.management.MBeanServerPermission "createMBeanServer";
+
+
+    permission javax.management.MBeanPermission "*", "registerMBean,unregisterMBean";
+    permission javax.management.MBeanTrustPermission "register";
+
+};
+
+grant codeBase "file:server" {
+    //
+    // The server requires the permissions to create and register the connector
+    // and all the permissions required by the operations performed by remote
+    // user calls. Here AllPermission is granted for simplicity.
+    //
+   // permission java.security.AllPermission;
+
+};
+
+grant codeBase "file:mbeans" {
+    permission javax.management.MBeanTrustPermission "register";
+
+};
+
+/*grant principal javax.management.remote.JMXPrincipal "username" {
+    permission javax.management.MBeanServerPermission "createMBeanServer";
+    permission javax.management.MBeanPermission "*", "getDomains";
+    permission javax.management.MBeanPermission "SimpleStandard#-[-]", "instantiate";
+    permission javax.management.MBeanPermission "SimpleStandard#-[MBeans:type=SimpleStandard]", "registerMBean";
+    permission javax.management.MBeanPermission "SimpleStandard#State[MBeans:type=SimpleStandard]", "getAttribute";
+    permission javax.management.MBeanPermission "SimpleStandard#State[MBeans:type=SimpleStandard]", "setAttribute";
+    permission javax.management.MBeanPermission "SimpleStandard#-[MBeans:type=SimpleStandard]", "addNotificationListener";
+    permission javax.management.MBeanPermission "SimpleStandard#reset[MBeans:type=SimpleStandard]", "invoke";
+    permission javax.management.MBeanPermission "SimpleStandard#-[MBeans:type=SimpleStandard]", "removeNotificationListener";
+    permission javax.management.MBeanPermission "SimpleStandard#-[MBeans:type=SimpleStandard]", "unregisterMBean";
+    //
+    // This permission is only required for the authenticated user and not for the delegated users.
+    //
+    // The RMI connector client registers a listener on the MBeanServerDelegate to control the MBean
+    // creation/deletion. The listener is removed when the connection to the server is closed.
+    //
+    permission javax.management.MBeanPermission "javax.management.MBeanServerDelegate#-[JMImplementation:type=MBeanServerDelegate]", "addNotificationListener";
+    permission javax.management.MBeanPermission "javax.management.MBeanServerDelegate#-[JMImplementation:type=MBeanServerDelegate]", "removeNotificationListener";
+};*/
+
+grant principal javax.management.remote.JMXPrincipal "user2" {
+  permission javax.management.MBeanPermission "*", "*";
+};
+
+grant principal javax.management.remote.JMXPrincipal "user1" {
+  permission javax.management.MBeanPermission "*", "getAttribute, invoke";
+};
+

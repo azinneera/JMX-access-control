@@ -1,0 +1,135 @@
+/*
+ * Copyright (c) 2004, Oracle and/or its affiliates. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *   - Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   - Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ *   - Neither the name of Oracle or the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package server;
+
+import java.io.File;
+import java.util.HashMap;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnectorServer;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+
+import java.lang.management.*;
+import java.rmi.registry.*;
+import java.util.*;
+import javax.management.*;
+import javax.management.remote.*;
+import javax.management.remote.rmi.*;
+import javax.rmi.ssl.*;
+
+public class Server {
+
+    public static void main(String[] args) {
+        try {
+
+            // Ensure cryptographically strong random number generator used
+            // to choose the object number - see java.rmi.server.ObjID
+            //
+            System.setProperty("java.rmi.server.randomIDs", "true");
+
+            // Start an RMI registry on port 3000.
+            //
+            System.out.println("Create RMI registry on port 3000");
+            LocateRegistry.createRegistry(3000);
+
+            // Retrieve the PlatformMBeanServer.
+            //
+            System.out.println("Get the platform's MBean server");
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
+//   --------------------------------------------------------------------------
+
+            // Construct the ObjectName for the Hello MBean we will register
+            ObjectName mbeanName = new ObjectName("server:type=Hello");
+
+            // Create the Hello World MBean
+            Hello mbean = new Hello();
+
+            // Register the Hello World MBean
+            mbs.registerMBean(mbean, mbeanName);
+//------------------------------------------------------------------------------
+
+/*
+            // Instantiate the MBean server
+            //
+            System.out.println("\nCreate the MBean server");
+            MBeanServer mbs = MBeanServerFactory.createMBeanServer();*/
+
+            // Environment map
+            //
+            System.out.println("\nInitialize the environment map");
+            HashMap<String,Object> env = new HashMap<String,Object>();
+
+            // Provide SSL-based RMI socket factories.
+            //
+            SslRMIClientSocketFactory csf = new SslRMIClientSocketFactory();
+            SslRMIServerSocketFactory ssf = new SslRMIServerSocketFactory();
+            env.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,csf);
+            env.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,ssf);
+
+            // Provide the password file used by the connector server to
+            // perform user authentication. The password file is a properties
+            // based text file specifying username/password pairs. This
+            // properties based password authenticator has been implemented
+            // using the JMXAuthenticator interface and is passed to the
+            // connector through the "jmx.remote.authenticator" property
+            // in the map.
+            //
+            // This property is implementation-dependent and might not be
+            // supported by all implementations of the JMX Remote API.
+            //
+            env.put("jmx.remote.x.password.file",
+                    "config" + File.separator + "password.properties");
+
+            // Create an RMI connector server
+            //
+            System.out.println("\nCreate an RMI connector server");
+            JMXServiceURL url = new JMXServiceURL(
+              "service:jmx:rmi:///jndi/rmi://:3000/jmxrmi");
+            JMXConnectorServer cs =
+                JMXConnectorServerFactory.newJMXConnectorServer(url, env, mbs);
+
+            // Start the RMI connector server
+            //
+            System.out.println("\nStart the RMI connector server");
+            cs.start();
+            System.out.println("\nRMI connector server successfully started");
+            System.out.println("\nWaiting for incoming connections...");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -1,0 +1,14 @@
+grant codeBase "file:server" {
+
+  permission javax.management.remote.SubjectDelegationPermission "javax.management.remote.JMXPrincipal.monitorRole";
+  permission javax.management.remote.SubjectDelegationPermission "javax.management.remote.JMXPrincipal.controlRole";
+
+};
+
+grant principal javax.management.remote.JMXPrincipal "monitorRole" {
+   permission javax.management.MBeanPermission "[server:\*]", "getAttribute";
+};
+
+grant principal javax.management.remote.JMXPrincipal "controlRole" {
+  permission javax.management.MBeanPermission "\*", "\*";
+};
